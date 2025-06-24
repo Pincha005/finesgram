@@ -1,4 +1,4 @@
-# flutter_application_1
+# Finesgram
 
 A new Flutter project.
 
