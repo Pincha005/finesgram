@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
-import 'pages/accueil_page.dart';
+import 'package:flutter_application_1/pages/historique_page.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'pages/entree_page.dart';
 import 'pages/inscription_page.dart';
 import 'pages/connexion_page.dart';
+import 'pages/accueil_page.dart';
+import 'pages/revenu_page.dart';
+import 'pages/depense_page.dart';
+import 'pages/epargne_page.dart';
+import 'pages/objectif_page.dart';
+import 'pages/parametres_page.dart';
 
 void main() {
-  //cette foction dit ce que l'appli est censé faire : le comportement de l'app
   runApp(const MyApp());
 }
 
@@ -12,25 +19,40 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  // construire l'application 
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Mon application financière',
-        theme: ThemeData(primarySwatch: Colors.blue),
-        home: const AccueilPage(),
-        // definition des routes
-        routes: {
-          '/accueil': (context) => const AccueilPage(),
-          '/inscription': (context) => const InscriptionPage(),
-          '/connexion': (context) => const ConnexionPage(),
-         // '/connexion': (context)  => const InscriptionPage(),
-          // on met 'const' devant les pages statiques afin que Flutter les construisent une seule fois
-          // et epargne de donner du travaille au CPU et à la mémoire .
-        },
-        onUnknownRoute: (settings) {
-          return MaterialPageRoute(
-              builder: (context) =>
-                  const AccueilPage()); // pour gerer les routes non definies
-        });
+      title: 'Gestion financière',
+      theme: ThemeData(
+        primarySwatch: Colors.teal,
+        textTheme: GoogleFonts.poppinsTextTheme(),
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
+      debugShowCheckedModeBanner: false,
+      initialRoute: '/entree',
+      routes: {
+        '/entree': (context) => const EntreePage(),
+        '/inscription': (context) => const InscriptionPage(),
+        '/connexion': (context) => const ConnexionPage(),
+        '/accueil': (context) => const AccueilPage(),
+        '/revenu': (context) => const RevenuPage(),
+        '/depense': (context) => const DepensePage(),
+        '/epargne': (context) => const EpargnePage(),
+        '/objectifs': (context) => const ObjectifsPage(),
+        '/historique': (context) => HistoriquePage(
+              transactions: [],
+            ),
+        '/parametres': (context) => ParametresPage(
+              userEmail: 'email_utilisateur',
+              onLogout: () {
+                Navigator.of(context).pushReplacementNamed('/connexion');
+              },
+              onThemeChange: (bool value) {},
+              onFontSizeChange: (double value) {},
+            ),
+      },
+      onUnknownRoute: (settings) => MaterialPageRoute(
+        builder: (context) => const EntreePage(),
+      ),
+    );
   }
 }

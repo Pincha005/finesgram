@@ -24,18 +24,21 @@ class _ConnexionPageState extends State<ConnexionPage> {
   Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
+      await Future.delayed(const Duration(seconds: 2));
 
       setState(() => _isLoading = false);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Connexion réussie!')),
       );
+      Navigator.pushReplacementNamed(context, '/accueil');
     }
   }
 
   @override
   Widget build(BuildContext) {
     return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 183, 163, 104),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -57,23 +60,31 @@ class _ConnexionPageState extends State<ConnexionPage> {
                 const SizedBox(height: 48.0),
                 //champ email
                 TextFormField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    prefixIcon: Icon(Icons.email),
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Veuillez entrer votre email';
-                    }
-                    if (!value.contains('@') || !value.contains('.')) {
-                      return 'Email invalide';
-                    }
-                    return null;
-                  },
-                ),
+                    controller: _emailController,
+                    decoration: const InputDecoration(
+                      labelText: 'Email',
+                      prefixIcon: Icon(Icons.email),
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Email requis';
+                      }
+
+                      final parts = value.split('@');
+                      if (parts.length != 2 || parts[1].split('.').length < 2) {
+                        return 'Format: utilisateur@domaine.com';
+                      }
+
+                      final domainParts = parts[1].split('.');
+                      if (domainParts.last.isEmpty ||
+                          RegExp(r'[^a-zA-Z]').hasMatch(domainParts.last)) {
+                        return 'Extension (.com/.fr) invalide';
+                      }
+
+                      return null;
+                    }),
                 const SizedBox(height: 16.0),
 
                 // champ mot de passe
@@ -134,7 +145,9 @@ class _ConnexionPageState extends State<ConnexionPage> {
                   children: [
                     const Text('Pas encore inscrit?'),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pushReplacementNamed(context, '/inscription');
+                      },
                       child: const Text('Créer un compte'),
                     ),
                   ],
