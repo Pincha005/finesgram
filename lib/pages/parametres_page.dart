@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-//import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_application_1/models/user_model.dart';
 
 class ParametresPage extends StatefulWidget {
-  final String userEmail;
+  final User user;
   final Function() onLogout;
   final Function(bool) onThemeChange;
   final Function(double) onFontSizeChange;
 
   const ParametresPage({
     Key? key,
-    required this.userEmail,
+    required this.user,
     required this.onLogout,
     required this.onThemeChange,
     required this.onFontSizeChange,
@@ -42,8 +42,8 @@ class _ParametresPageState extends State<ParametresPage> {
             _buildListTile(
               icon: Icons.person,
               title: 'Profil',
-              subtitle: widget.userEmail,
-              onTap: () => _editProfile(),
+              subtitle: widget.user.email,
+              onTap: _goToProfile,
             ),
             const Divider(),
 
@@ -103,7 +103,7 @@ class _ParametresPageState extends State<ParametresPage> {
               icon: Icons.logout,
               title: 'Déconnexion',
               color: Colors.red,
-              onTap: () => _confirmLogout(),
+              onTap: _confirmLogout,
             ),
           ],
         ),
@@ -155,20 +155,11 @@ class _ParametresPageState extends State<ParametresPage> {
     );
   }
 
-  void _editProfile() {
-    // Implémentez la navigation vers l'édition du profil
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Modifier le profil'),
-        content: const Text('Fonctionnalité à implémenter'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
+  void _goToProfile() {
+    Navigator.pushNamed(
+      context,
+      '/profil',
+      arguments: widget.user,
     );
   }
 

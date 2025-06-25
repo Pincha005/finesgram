@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/parametres_page.dart';
+import 'package:flutter_application_1/models/user_model.dart';
 
 class AccueilPage extends StatefulWidget {
-  const AccueilPage({Key? key}) : super(key: key);
+  final User user;
+
+  const AccueilPage({Key? key, required this.user}) : super(key: key);
 
   @override
   State<AccueilPage> createState() => _AccueilPageState();
@@ -107,7 +110,7 @@ class _AccueilPageState extends State<AccueilPage> {
       context,
       MaterialPageRoute(
         builder: (context) => ParametresPage(
-          userEmail: 'user@email.com',
+          user: widget.user,
           onLogout: () {
             Navigator.pushReplacementNamed(context, '/connexion');
           },

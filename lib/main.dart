@@ -10,6 +10,8 @@ import 'pages/depense_page.dart';
 import 'pages/epargne_page.dart';
 import 'pages/objectif_page.dart';
 import 'pages/parametres_page.dart';
+import 'pages/profil_page.dart';
+import 'package:flutter_application_1/models/user_model.dart';
 
 void main() {
   runApp(const MyApp());
@@ -33,7 +35,9 @@ class MyApp extends StatelessWidget {
         '/entree': (context) => const EntreePage(),
         '/inscription': (context) => const InscriptionPage(),
         '/connexion': (context) => const ConnexionPage(),
-        '/accueil': (context) => const AccueilPage(),
+        '/accueil': (context) =>  AccueilPage(
+              user: User( id : '1',nom: 'Jean', email: 'jean@email.com'),
+            ),
         '/revenu': (context) => const RevenuPage(),
         '/depense': (context) => const DepensePage(),
         '/epargne': (context) => const EpargnePage(),
@@ -41,14 +45,31 @@ class MyApp extends StatelessWidget {
         '/historique': (context) => HistoriquePage(
               transactions: [],
             ),
-        '/parametres': (context) => ParametresPage(
-              userEmail: 'email_utilisateur',
+        '/parametres': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments;
+          if (args is User) {
+            return ParametresPage(
+              user: args,
               onLogout: () {
                 Navigator.of(context).pushReplacementNamed('/connexion');
               },
               onThemeChange: (bool value) {},
               onFontSizeChange: (double value) {},
-            ),
+            );
+          } else {
+            return const EntreePage(); // fallback
+          }
+        },
+        '/profil': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments;
+          if (args is User) {
+            return ProfilPage(
+              user: args,
+            );
+          } else {
+            return const EntreePage();
+          }
+        },
       },
       onUnknownRoute: (settings) => MaterialPageRoute(
         builder: (context) => const EntreePage(),

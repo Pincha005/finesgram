@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/user_model.dart';
 
 class RevenuPage extends StatefulWidget {
   const RevenuPage({Key? key}) : super(key: key);

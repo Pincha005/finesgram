@@ -3,9 +3,13 @@ import 'package:flutter_application_1/models/transaction.dart';
 
 class HistoriquePage extends StatelessWidget {
   final List<Transaction> transactions;
+  final Function(Transaction) addTransaction;
 
-  const HistoriquePage({Key? key, required this.transactions})
-      : super(key: key);
+  const HistoriquePage({
+    Key? key,
+    required this.transactions,
+    required this.addTransaction,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -68,4 +72,4 @@ class HistoriquePage extends StatelessWidget {
   }
 }
 
-
+// Quand l'utilisateur valide :
