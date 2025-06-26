@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/transaction.dart' as trans;
 import 'package:flutter_application_1/models/user_model.dart';
+import 'package:flutter_application_1/pages/commentaire_page.dart';
 import 'package:flutter_application_1/pages/historique_page.dart';
+import 'package:flutter_application_1/pages/rappel_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'pages/entree_page.dart';
 import 'pages/inscription_page.dart';
@@ -14,6 +16,7 @@ import 'pages/objectif_page.dart';
 import 'pages/parametres_page.dart';
 import 'pages/profil_page.dart';
 import 'pages/edit_profil_page.dart';
+import 'pages/a_propos_de_nous_page.dart';
 
 void main() => runApp(const MyApp());
 
@@ -75,6 +78,9 @@ class MyApp extends StatelessWidget {
               ? EditProfilPage(user: user)
               : const ConnexionPage();
         },
+        '/a_propos_de_nous': (context) => const AProposDeNousPage(),
+        '/commentaire': (context) => const CommentairePage(),
+        '/rappel': (context) => const RappelPage(),
       },
       onUnknownRoute: (settings) => MaterialPageRoute(
         builder: (context) => const EntreePage(),

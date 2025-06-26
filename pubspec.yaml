@@ -13,10 +13,11 @@ dependencies:
     sdk: flutter
   google_fonts: ^6.2.1 # police google fonts
   cupertino_icons: ^1.0.2 # pour les icônes iOS style Cupertino
+  http: ^1.2.1 # Pour faire les requêtes HTTP
+  url_launcher: ^6.2.6 # Pour permettre l'envoi de mail depuis la page commentaire
  
 
-  http: ^1.2.1 # Pour faire les requêtes HTTP
- # firebase_core: ^3.14.0
+  # firebase_core: ^3.14.0
   #cloud_firestore: ^5.6.9
    
 
@@ -28,16 +29,16 @@ dev_dependencies:
 
 flutter_native_splash:
   color: "#b7a368"
-  image: assets/logo2.png
+  image: assets/logo.jpeg
   android: true
   ios: true
 
 flutter_icons:
   android: true
   ios: true
-  image_path: "assets/logo2.png"
+  image_path: "assets/logo.jpeg"
 
 flutter:
   uses-material-design: true
   assets:
-    - assets/logo2.png
+    - assets/logo.jpeg

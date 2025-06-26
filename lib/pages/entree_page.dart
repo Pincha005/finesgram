@@ -6,34 +6,33 @@ class EntreePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 183, 163, 104),
+      backgroundColor: const Color.fromARGB(255, 247, 248, 249),
       appBar: AppBar(
         title: const Text(
           'Bienvenue au Finesgram',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Color.fromARGB(255, 255, 254, 254)),
         ),
-        backgroundColor: Colors.brown[700],
+        backgroundColor: const Color.fromARGB(255, 107, 171, 232),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset('assets/logo2.png', width: 200),
+            Image.asset('assets/logo.jpeg', width: 200),
             const Text(
               'Gérer vos finances cher étudiant',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: Color.fromARGB(255, 133, 179, 234),
               ),
             ),
             const SizedBox(height: 30), // espacement
             ElevatedButton(
               onPressed: () => _navigateToInscription(context),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.brown[600],
+                backgroundColor: const Color.fromARGB(255, 221, 164, 205),
                 padding:
                     const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
               ),

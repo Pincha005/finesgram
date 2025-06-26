@@ -54,7 +54,7 @@ class _ConnexionPageState extends State<ConnexionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 183, 163, 104),
+      backgroundColor: const Color.fromARGB(255, 247, 248, 249),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -67,13 +67,13 @@ class _ConnexionPageState extends State<ConnexionPage> {
                 Icon(
                   Icons.account_balance_wallet,
                   size: 100,
-                  color: Colors.brown[700],
+                  color: const Color.fromARGB(255, 236, 110, 110),
                 ),
                 const SizedBox(height: 24.0),
                 Text(
                   'Connexion',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        color: Colors.brown[800],
+                        color: const Color.fromARGB(255, 109, 192, 218),
                         fontWeight: FontWeight.bold,
                       ),
                   textAlign: TextAlign.center,
@@ -135,7 +135,7 @@ class _ConnexionPageState extends State<ConnexionPage> {
                       child: Text(
                         'Mot de passe oublié ?',
                         style: TextStyle(
-                          color: Colors.brown[800],
+                          color: const Color.fromARGB(255, 12, 11, 10),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -148,7 +148,7 @@ class _ConnexionPageState extends State<ConnexionPage> {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: Colors.brown[700],
+                    backgroundColor: const Color.fromARGB(255, 109, 192, 218),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -197,7 +197,7 @@ class _ConnexionPageState extends State<ConnexionPage> {
                 OutlinedButton(
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    side: BorderSide(color: Colors.brown[700]!),
+                    side: BorderSide(color: Colors.pink[700]!),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -208,7 +208,7 @@ class _ConnexionPageState extends State<ConnexionPage> {
                     'Créer un compte',
                     style: TextStyle(
                       fontSize: 16,
-                      color: Colors.brown[700],
+                      color: Colors.black,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

@@ -75,9 +75,12 @@ class _InscriptionPageState extends State<InscriptionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 183, 163, 104),
+      backgroundColor: const Color.fromARGB(255, 247, 248, 249),
       appBar: AppBar(
-        title: const Text('Inscription'),
+        title: const Text(
+          'Inscription',
+          style: TextStyle(color: const Color.fromARGB(255, 107, 171, 232)),
+        ),
         elevation: 0,
         backgroundColor: Colors.transparent,
       ),
@@ -165,7 +168,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
                   onPressed: _isLoading ? null : _register,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 15),
-                    backgroundColor: Colors.brown[700],
+                    backgroundColor: const Color.fromARGB(255, 197, 107, 117),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -181,7 +184,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
                 onPressed: () => Navigator.pushNamed(context, '/connexion'),
                 child: const Text(
                   'Déjà un compte ? Connectez-vous',
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: Color.fromARGB(255, 102, 140, 178)),
                 ),
               ),
             ],

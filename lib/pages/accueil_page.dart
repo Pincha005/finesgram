@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/user_model.dart';
-import 'package:flutter_application_1/models/transaction.dart';
 
 class AccueilPage extends StatelessWidget {
   final User user;
@@ -137,38 +136,38 @@ class AccueilPage extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(16),
               child: Text(
-                'Ajouter une transaction',
+                'Informations',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
             ),
             _buildAddOption(
               context,
-              icon: Icons.attach_money,
-              label: 'Revenu',
-              color: Colors.green,
+              icon: Icons.info,
+              label: 'A propos de nous',
+              color: Colors.lightGreen,
               onTap: () {
                 Navigator.pop(context);
-                Navigator.pushNamed(context, '/revenu');
+                Navigator.pushNamed(context, '/a_propos_de_nous');
               },
             ),
             _buildAddOption(
               context,
-              icon: Icons.shopping_cart,
-              label: 'Dépense',
-              color: Colors.red,
+              icon: Icons.comment,
+              label: 'Commentaire',
+              color: Colors.purpleAccent,
               onTap: () {
                 Navigator.pop(context);
-                Navigator.pushNamed(context, '/depense');
+                Navigator.pushNamed(context, '/commentaire');
               },
             ),
             _buildAddOption(
               context,
-              icon: Icons.savings,
-              label: 'Épargne',
-              color: Colors.blue,
+              icon: Icons.alarm,
+              label: 'Rappel',
+              color: Colors.indigoAccent,
               onTap: () {
                 Navigator.pop(context);
-                Navigator.pushNamed(context, '/epargne');
+                Navigator.pushNamed(context, '/rappel');
               },
             ),
             const SizedBox(height: 8),
