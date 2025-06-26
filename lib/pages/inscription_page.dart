@@ -1,138 +1,190 @@
-// les importations
-//import 'package:cloud_firestore/cloud_firestore.dart';
-//import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart'; // fichier contenant les outils graphiques de flu : boutons, textes, champ de saisie
-//import 'package:http/http.dart' as http;
-//import 'dart:convert';
-
-// CREATION DE LA PAGE
+import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/user_model.dart';
 
 class InscriptionPage extends StatefulWidget {
-  // classe où tous les outils essentiels pour le bon fonctionnement de cette âge
-  // parente page Dynamique ou qu'on peut mise à journée
   const InscriptionPage({Key? key}) : super(key: key);
 
-  @override //redefinit ma classe 'inscriptionpage' par la classe parente
+  @override
   _InscriptionPageState createState() => _InscriptionPageState();
 }
 
-/*void ajouterUtilisateur(){
-    FirebaseFirestore.instance.collection('users').add({
-      'nom': 'Princesse',
-      'email': 'pinchakalala@gmail.com',
-      'date_creation': FieldValue.serverTimestamp(),
-    }).then((value){
-      print(
-        'Utilisateur ajouté avec ID: ${value.id}'
-      );
-    }).catchError(
-      (error){
-        print('Erreur : $error');
-      }); 
-} */
-
 class _InscriptionPageState extends State<InscriptionPage> {
-  final _formKey = GlobalKey<
-      FormState>(); // c'est une clé qui verifie que le formulait est bien rempli
-  // LES CONTROLEURS : permet de stocker ce que le user ecrit dans ces champs precis
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  bool _isLoading = false;
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   @override
   void dispose() {
-    // cette fonction permet de liberer ces 3 champs libre afin de libérer de l'espace dans la memoire
     _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  // fonction qui verifie et affiche les données du formulaire sans enregistrer dans base de données
-  void _register() async {
+  Future<void> _register() async {
     if (_formKey.currentState!.validate()) {
-      Navigator.pushNamed(context, '/accueil');
-      // cette condition verifie si tous les champs sont valides
-      print('Nom : ${_usernameController.text}');
-      print('Email: ${_emailController.text}');
-      print('Mot de passe : ${_passwordController.text}');
+      setState(() => _isLoading = true);
+
+      try {
+        // Simulation de création d'utilisateur
+        await Future.delayed(const Duration(seconds: 2));
+
+        if (!mounted) return;
+
+        final newUser = User(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          nom: _usernameController.text,
+          email: _emailController.text,
+          // Ajoutez ici les autres propriétés nécessaires
+        );
+
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/accueil',
+          (route) => false, // Supprime toutes les routes précédentes
+          arguments: newUser,
+        );
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Inscription réussie ! Bienvenue.')),
+        );
+      } catch (e) {
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur: ${e.toString()}')),
+        );
+      } finally {
+        if (mounted) {
+          setState(() => _isLoading = false);
+        }
+      }
     }
+  }
+
+  bool _isValidEmail(String email) {
+    return RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 183, 163, 104),
-      appBar: AppBar(title: const Text('Inscription')),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
+      appBar: AppBar(
+        title: const Text('Inscription'),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
         child: Form(
           key: _formKey,
           child: Column(
             children: [
               TextFormField(
                 controller: _usernameController,
-                decoration:
-                    const InputDecoration(labelText: 'Nom de l’utilisateur'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Veuillez entrer un nom d’utilsateur';
-                  }
-                  return null;
-                },
+                decoration: const InputDecoration(
+                  labelText: 'Nom d\'utilisateur',
+                  border: OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.white,
+                  prefixIcon: Icon(Icons.person),
+                ),
+                validator: (value) =>
+                    value?.isEmpty ?? true ? 'Champ obligatoire' : null,
               ),
+              const SizedBox(height: 15),
               TextFormField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(labelText: 'Email'),
-                  keyboardType: TextInputType
-                      .emailAddress, //permet de retrouver @ facilement ex: quand le clavier nous propose directement @gmail
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Email requis';
-                    }
-
-                    final parts = value.split('@');
-                    if (parts.length != 2 || parts[1].split('.').length < 2) {
-                      return 'Format: utilisateur@domaine.com';
-                    }
-
-                    final domainParts = parts[1].split('.');
-                    if (domainParts.last.isEmpty ||
-                        RegExp(r'[^a-zA-Z]').hasMatch(domainParts.last)) {
-                      return 'Extension (.com/.fr) invalide';
-                    }
-
-                    return null;
-                  }),
+                controller: _emailController,
+                decoration: const InputDecoration(
+                  labelText: 'Email',
+                  border: OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.white,
+                  prefixIcon: Icon(Icons.email),
+                ),
+                keyboardType: TextInputType.emailAddress,
+                validator: (value) => value == null || !_isValidEmail(value)
+                    ? 'Email invalide'
+                    : null,
+              ),
+              const SizedBox(height: 15),
               TextFormField(
                 controller: _passwordController,
-                decoration: const InputDecoration(labelText: 'Mot de passe'),
-                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: 'Mot de passe',
+                  border: const OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.white,
+                  prefixIcon: const Icon(Icons.lock),
+                  suffixIcon: IconButton(
+                    icon: Icon(_obscurePassword
+                        ? Icons.visibility
+                        : Icons.visibility_off),
+                    onPressed: () =>
+                        setState(() => _obscurePassword = !_obscurePassword),
+                  ),
+                ),
+                obscureText: _obscurePassword,
                 validator: (value) => value == null || value.length < 6
                     ? 'Minimum 6 caractères'
                     : null,
               ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _register,
-
-                // envoyerDonnees(); // APPEL DE LA FONCTION
-
-                child: const Text('S inscrire'),
+              const SizedBox(height: 15),
+              TextFormField(
+                controller: _confirmPasswordController,
+                decoration: InputDecoration(
+                  labelText: 'Confirmation',
+                  border: const OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.white,
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  suffixIcon: IconButton(
+                    icon: Icon(_obscureConfirmPassword
+                        ? Icons.visibility
+                        : Icons.visibility_off),
+                    onPressed: () => setState(() =>
+                        _obscureConfirmPassword = !_obscureConfirmPassword),
+                  ),
+                ),
+                obscureText: _obscureConfirmPassword,
+                validator: (value) => value != _passwordController.text
+                    ? 'Mots de passe différents'
+                    : null,
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 25),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _register,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    backgroundColor: Colors.brown[700],
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text('S\'inscrire',
+                          style: TextStyle(fontSize: 16)),
+                ),
+              ),
+              const SizedBox(height: 15),
               TextButton(
-                onPressed: () {
-                  // Navigator.pushNamed(context, '/connexion');
-                  Navigator.pushNamed(context, '/connexion');
-                },
-                child: const Text("Déjà un compte? Connectez vous!"),
+                onPressed: () => Navigator.pushNamed(context, '/connexion'),
+                child: const Text(
+                  'Déjà un compte ? Connectez-vous',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ],
-            /*  ElevatedButton(
-              onPressed: ajouterUtilisateur,
-              
-              child: const Text('Ajouter utilisateur'),*/
           ),
         ),
       ),

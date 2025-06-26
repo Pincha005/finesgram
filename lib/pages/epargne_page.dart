@@ -1,91 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/transaction_form_page.dart';
 
-class EpargnePage extends StatefulWidget {
+class EpargnePage extends StatelessWidget {
   const EpargnePage({Key? key}) : super(key: key);
 
   @override
-  State<EpargnePage> createState() => _EpargnePageState();
-}
-
-class _EpargnePageState extends State<EpargnePage> {
-  final _formKey = GlobalKey<FormState>();
-  final _montantController = TextEditingController();
-  final _sourceController = TextEditingController();
-  DateTime _selectedDate = DateTime.now();
-
-  void _submitForm() {
-    if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Epargne enregistré ✅')));
-
-      _montantController.clear();
-      _sourceController.clear();
-      setState(() => _selectedDate = DateTime.now());
-    }
-  }
-
-  void _pickDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime(2000),
-      lastDate: DateTime.now(),
-    );
-    if (picked != null) {
-      setState(() => _selectedDate = picked);
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 241, 240, 147),
-        title: const Text('Epargner pour plus avoir!'),
-        centerTitle: true,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(15.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: _montantController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Montant (FC)'),
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'Entrer un montant' : null,
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                controller: _sourceController,
-                decoration: const InputDecoration(labelText: 'Type epargne'),
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'Entrer un type' : null,
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Text(
-                    'Date : ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
-                  ),
-                  const SizedBox(width: 20),
-                  TextButton(
-                    onPressed: _pickDate,
-                    child: const Text('Choisir une date'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _submitForm,
-                child: const Text('Enregistrer'),
-              ),
-            ],
-          ),
-        ),
-      ),
+    return TransactionFormPage(
+      title: 'Nouvelle Épargne',
+      typeLabel: 'Type d\'épargne',
+      successMessage: 'Épargne enregistrée ✅',
+      appBarColor: Colors.blue[200]!,
+      // Couleur spécifique
     );
   }
 }

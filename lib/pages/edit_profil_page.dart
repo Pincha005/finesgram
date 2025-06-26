@@ -11,70 +11,159 @@ class EditProfilPage extends StatefulWidget {
 }
 
 class _EditProfilPageState extends State<EditProfilPage> {
-  late TextEditingController nomController;
-  late TextEditingController telephoneController;
-  late TextEditingController adresseController;
+  late final TextEditingController _nomController;
+  late final TextEditingController _emailController;
+  late final TextEditingController _telephoneController;
+  late final TextEditingController _adresseController;
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
     super.initState();
-    nomController = TextEditingController(text: widget.user.nom);
-    telephoneController = TextEditingController(text: widget.user.telephone ?? '');
-    adresseController = TextEditingController(text: widget.user.adresse ?? '');
+    _nomController = TextEditingController(text: widget.user.nom);
+    _emailController = TextEditingController(text: widget.user.email);
+    _telephoneController = TextEditingController(text: widget.user.telephone ?? '');
+    _adresseController = TextEditingController(text: widget.user.adresse ?? '');
   }
 
   @override
   void dispose() {
-    nomController.dispose();
-    telephoneController.dispose();
-    adresseController.dispose();
+    _nomController.dispose();
+    _emailController.dispose();
+    _telephoneController.dispose();
+    _adresseController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Modifier mon profil')),
-      body: Padding(
+      appBar: AppBar(
+        title: const Text('Modifier le profil'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.save),
+            onPressed: _saveProfile,
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            TextField(
-              controller: nomController,
-              decoration: const InputDecoration(labelText: 'Nom'),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: telephoneController,
-              decoration: const InputDecoration(labelText: 'Téléphone'),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: adresseController,
-              decoration: const InputDecoration(labelText: 'Adresse'),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _sauvegarderProfil,
-              child: const Text('Enregistrer'),
-            ),
-          ],
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              _buildAvatarSection(),
+              const SizedBox(height: 24),
+              _buildFormField(
+                controller: _nomController,
+                label: 'Nom complet',
+                icon: Icons.person,
+                validator: (value) =>
+                    value?.isEmpty ?? true ? 'Ce champ est obligatoire' : null,
+              ),
+              const SizedBox(height: 16),
+              _buildFormField(
+                controller: _emailController,
+                label: 'Email',
+                icon: Icons.email,
+                enabled: false, // Email non modifiable
+              ),
+              const SizedBox(height: 16),
+              _buildFormField(
+                controller: _telephoneController,
+                label: 'Téléphone',
+                icon: Icons.phone,
+                keyboardType: TextInputType.phone,
+              ),
+              const SizedBox(height: 16),
+              _buildFormField(
+                controller: _adresseController,
+                label: 'Adresse',
+                icon: Icons.location_on,
+              ),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: _saveProfile,
+                  child: const Text('Enregistrer les modifications'),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  void _sauvegarderProfil() {
-    final updatedUser = User(
-      id: widget.user.id,
-      nom: nomController.text,
-      email: widget.user.email,
-      photoUrl: widget.user.photoUrl,
-      telephone: telephoneController.text,
-      adresse: adresseController.text,
-      dateInscription: widget.user.dateInscription,
+  Widget _buildAvatarSection() {
+    return Center(
+      child: Stack(
+        children: [
+          CircleAvatar(
+            radius: 50,
+            backgroundImage: widget.user.photoUrl != null
+                ? NetworkImage(widget.user.photoUrl!)
+                : const AssetImage('assets/default_avatar.png')
+                    as ImageProvider,
+          ),
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.camera_alt, color: Colors.white, size: 20),
+            ),
+          ),
+        ],
+      ),
     );
+  }
 
-    Navigator.pop(context, updatedUser);
+  Widget _buildFormField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    bool enabled = true,
+    TextInputType? keyboardType,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+      enabled: enabled,
+      keyboardType: keyboardType,
+      validator: validator,
+    );
+  }
+
+  void _saveProfile() {
+    if (_formKey.currentState?.validate() ?? false) {
+      final updatedUser = User(
+        id: widget.user.id,
+        nom: _nomController.text,
+        email: _emailController.text,
+        photoUrl: widget.user.photoUrl,
+        telephone: _telephoneController.text.isEmpty
+            ? null
+            : _telephoneController.text,
+        adresse: _adresseController.text.isEmpty ? null : _adresseController.text,
+        dateInscription: widget.user.dateInscription,
+      );
+
+      Navigator.pop(context, updatedUser);
+    }
   }
 }

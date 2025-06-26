@@ -22,6 +22,7 @@ class User {
   String? telephone;
   String? adresse;
   String? dateInscription;
+  List<Transaction>? transactions;
 
   User({
     required this.id,
@@ -31,5 +32,6 @@ class User {
     this.telephone,
     this.adresse,
     this.dateInscription,
+    this.transactions,
   });
 }
