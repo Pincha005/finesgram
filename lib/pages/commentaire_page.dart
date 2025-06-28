@@ -24,6 +24,10 @@ class _CommentairePageState extends State<CommentairePage> {
     );
     if (await canLaunchUrl(emailLaunchUri)) {
       await launchUrl(emailLaunchUri);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Merci pour votre commentaire !')),
+      );
+      _controller.clear();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

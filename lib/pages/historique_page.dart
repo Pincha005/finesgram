@@ -1,29 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/models/transaction.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:finesgram/models/transaction.dart' as model;
 
 class HistoriquePage extends StatefulWidget {
-  final List<Transaction> transactions;
-
-  const HistoriquePage({super.key, required this.transactions});
+  final String userId;
+  const HistoriquePage({super.key, required this.userId});
 
   @override
   State<HistoriquePage> createState() => _HistoriquePageState();
 }
 
 class _HistoriquePageState extends State<HistoriquePage> {
-  TransactionType? _filterType;
+  model.TransactionType? _filterType;
   bool _newestFirst = true;
-
-  List<Transaction> get _filteredTransactions {
-    var transactions = widget.transactions
-        .where((t) => _filterType == null || t.type == _filterType)
-        .toList();
-
-    transactions.sort((a, b) =>
-        _newestFirst ? b.date.compareTo(a.date) : a.date.compareTo(b.date));
-
-    return transactions;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,13 +30,42 @@ class _HistoriquePageState extends State<HistoriquePage> {
           ),
         ],
       ),
-      body: _filteredTransactions.isEmpty
-          ? _buildEmptyState()
-          : ListView.builder(
-              itemCount: _filteredTransactions.length,
-              itemBuilder: (context, index) =>
-                  _TransactionCard(transaction: _filteredTransactions[index]),
-            ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('transactions')
+            .where('userId', isEqualTo: widget.userId)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return _buildEmptyState();
+          }
+          List<model.Transaction> transactions = [];
+          for (var doc in snapshot.data!.docs) {
+            try {
+              final t =
+                  model.Transaction.fromMap(doc.data() as Map<String, dynamic>);
+              if (_filterType == null || t.type == _filterType) {
+                transactions.add(t);
+              }
+            } catch (_) {
+              // Ignore transaction if malformed
+              continue;
+            }
+          }
+          transactions.sort((a, b) => _newestFirst
+              ? b.date.compareTo(a.date)
+              : a.date.compareTo(b.date));
+          if (transactions.isEmpty) return _buildEmptyState();
+          return ListView.builder(
+            itemCount: transactions.length,
+            itemBuilder: (context, index) =>
+                _TransactionCard(transaction: transactions[index]),
+          );
+        },
+      ),
     );
   }
 
@@ -77,13 +95,13 @@ class _HistoriquePageState extends State<HistoriquePage> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            RadioListTile<TransactionType?>(
+            RadioListTile<model.TransactionType?>(
               title: const Text('Tous'),
               value: null,
               groupValue: _filterType,
               onChanged: (value) => _applyFilter(value),
             ),
-            ...TransactionType.values.map((type) => RadioListTile(
+            ...model.TransactionType.values.map((type) => RadioListTile(
                   title: Text(type.toString().split('.').last),
                   value: type,
                   groupValue: _filterType,
@@ -121,7 +139,7 @@ class _HistoriquePageState extends State<HistoriquePage> {
     );
   }
 
-  void _applyFilter(TransactionType? type) {
+  void _applyFilter(model.TransactionType? type) {
     setState(() => _filterType = type);
     Navigator.pop(context);
   }
@@ -133,20 +151,19 @@ class _HistoriquePageState extends State<HistoriquePage> {
 }
 
 class _TransactionCard extends StatelessWidget {
-  final Transaction transaction;
-
+  final model.Transaction transaction;
   const _TransactionCard({required this.transaction});
 
   @override
   Widget build(BuildContext context) {
-    final color =
-        transaction.type == TransactionType.depense ? Colors.red : Colors.green;
-
+    final color = transaction.type == model.TransactionType.depense
+        ? Colors.red
+        : Colors.green;
     return Card(
       margin: const EdgeInsets.all(8),
       child: ListTile(
         leading: Icon(
-          transaction.type == TransactionType.depense
+          transaction.type == model.TransactionType.depense
               ? Icons.arrow_upward
               : Icons.arrow_downward,
           color: color,

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/models/user_model.dart';
+import 'package:finesgram/models/user_model.dart';
 
 class ProfilPage extends StatelessWidget {
-  final User user;
+  final AppUser user;
 
   const ProfilPage({super.key, required this.user});
 
@@ -16,14 +16,21 @@ class ProfilPage extends StatelessWidget {
           Center(
             child: Column(
               children: [
-                CircleAvatar(
-                  radius: 50,
-                  child:
-                      Text(user.nom[0], style: const TextStyle(fontSize: 40)),
+                Stack(
+                  alignment: Alignment.bottomRight,
+                  children: [
+                    // Affichage initial basé sur le nom
+                    CircleAvatar(
+                      radius: 50,
+                      child: Text(user.name[0],
+                          style: const TextStyle(fontSize: 40)),
+                    ),
+                    // ...bouton de modification photo...
+                  ],
                 ),
                 const SizedBox(height: 16),
-                Text(user.nom, style: Theme.of(context).textTheme.titleLarge),
-                Text(user.email),
+                Text(user.name, style: const TextStyle(fontSize: 22)),
+                Text(user.email, style: const TextStyle(color: Colors.grey)),
               ],
             ),
           ),

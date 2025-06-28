@@ -1,4 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 class RappelPage extends StatefulWidget {
   const RappelPage({super.key});
@@ -14,6 +18,7 @@ class _RappelPageState extends State<RappelPage> {
   DateTime? _dateDebut;
   TimeOfDay? _heure;
   String _frequence = 'Une fois';
+  bool _isLoading = false;
 
   final List<String> _frequences = [
     'Une fois',
@@ -22,23 +27,141 @@ class _RappelPageState extends State<RappelPage> {
     'Mensuel',
   ];
 
-  Future<void> _pickDate() async {
-    final now = DateTime.now();
-    final date = await showDatePicker(
-      context: context,
-      initialDate: _dateDebut ?? now,
-      firstDate: now,
-      lastDate: DateTime(now.year + 5),
+  final FlutterLocalNotificationsPlugin _notificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeNotifications();
+    tz.initializeTimeZones();
+  }
+
+  Future<void> _initializeNotifications() async {
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    const InitializationSettings initializationSettings =
+        InitializationSettings(
+      android: initializationSettingsAndroid,
     );
-    if (date != null) setState(() => _dateDebut = date);
+
+    await _notificationsPlugin.initialize(initializationSettings);
+  }
+
+  Future<void> _pickDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _dateDebut ?? DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
+    );
+    if (picked != null && picked != _dateDebut) {
+      setState(() => _dateDebut = picked);
+    }
   }
 
   Future<void> _pickTime() async {
-    final time = await showTimePicker(
+    final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: _heure ?? TimeOfDay.now(),
     );
-    if (time != null) setState(() => _heure = time);
+    if (picked != null && picked != _heure) {
+      setState(() => _heure = picked);
+    }
+  }
+
+  Future<void> _enregistrerRappel() async {
+    if (!_formKey.currentState!.validate()) return;
+    if (_dateDebut == null || _heure == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Veuillez sélectionner une date et une heure')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final DateTime dateTime = DateTime(
+        _dateDebut!.year,
+        _dateDebut!.month,
+        _dateDebut!.day,
+        _heure!.hour,
+        _heure!.minute,
+      );
+
+      // Enregistrement dans Firestore
+      await FirebaseFirestore.instance.collection('rappels').add({
+        'nom': _nomController.text.trim(),
+        'frequence': _frequence,
+        'date': Timestamp.fromDate(dateTime),
+        'note': _noteController.text.trim(),
+        'createdAt': Timestamp.now(),
+      });
+
+      // Planification de la notification
+      await _scheduleNotification(
+        _nomController.text.trim(),
+        _noteController.text.trim(),
+        dateTime,
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Rappel enregistré avec succès!')),
+      );
+
+      // Réinitialisation du formulaire
+      _formKey.currentState!.reset();
+      setState(() {
+        _dateDebut = null;
+        _heure = null;
+        _frequence = 'Une fois';
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur: ${e.toString()}')),
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _scheduleNotification(
+    String title,
+    String body,
+    DateTime dateTime,
+  ) async {
+    await _notificationsPlugin.zonedSchedule(
+      0, // ID de notification
+      title,
+      body,
+      tz.TZDateTime.from(dateTime, tz.local),
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'rappel_channel_id',
+          'Rappels',
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      matchDateTimeComponents: _getDateTimeComponents(),
+    );
+  }
+
+  DateTimeComponents? _getDateTimeComponents() {
+    switch (_frequence) {
+      case 'Tous les jours':
+        return DateTimeComponents.time;
+      case 'Hebdomadaire':
+        return DateTimeComponents.dayOfWeekAndTime;
+      case 'Mensuel':
+        return DateTimeComponents.dayOfMonthAndTime;
+      default:
+        return null; // Une fois
+    }
   }
 
   @override
@@ -46,10 +169,10 @@ class _RappelPageState extends State<RappelPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Créer un rappel'),
-        backgroundColor: const Color.fromARGB(255, 83, 109, 254),
+        backgroundColor: Colors.indigo,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: ListView(
@@ -57,26 +180,29 @@ class _RappelPageState extends State<RappelPage> {
               TextFormField(
                 controller: _nomController,
                 decoration: const InputDecoration(
-                  labelText: 'Nom du rappel',
+                  labelText: 'Nom du rappel*',
                   border: OutlineInputBorder(),
                 ),
-                validator: (value) => value == null || value.trim().isEmpty
-                    ? 'Veuillez entrer un nom.'
+                validator: (value) => value?.trim().isEmpty ?? true
+                    ? 'Ce champ est obligatoire'
                     : null,
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 value: _frequence,
                 items: _frequences
-                    .map((f) => DropdownMenuItem(value: f, child: Text(f)))
+                    .map((f) => DropdownMenuItem(
+                          value: f,
+                          child: Text(f),
+                        ))
                     .toList(),
-                onChanged: (val) => setState(() => _frequence = val!),
+                onChanged: (value) => setState(() => _frequence = value!),
                 decoration: const InputDecoration(
-                  labelText: 'Fréquence de rappel',
+                  labelText: 'Fréquence*',
                   border: OutlineInputBorder(),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(
@@ -84,7 +210,7 @@ class _RappelPageState extends State<RappelPage> {
                       onTap: _pickDate,
                       child: InputDecorator(
                         decoration: const InputDecoration(
-                          labelText: 'Date de début',
+                          labelText: 'Date*',
                           border: OutlineInputBorder(),
                         ),
                         child: Text(
@@ -101,7 +227,7 @@ class _RappelPageState extends State<RappelPage> {
                       onTap: _pickTime,
                       child: InputDecorator(
                         decoration: const InputDecoration(
-                          labelText: "Heure",
+                          labelText: 'Heure*',
                           border: OutlineInputBorder(),
                         ),
                         child: Text(
@@ -114,36 +240,38 @@ class _RappelPageState extends State<RappelPage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _noteController,
-                maxLines: 3,
                 decoration: const InputDecoration(
                   labelText: 'Note',
                   border: OutlineInputBorder(),
                 ),
+                maxLines: 3,
               ),
-              const SizedBox(height: 30),
-              ElevatedButton.icon(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    // Ici tu pourras ajouter la logique de sauvegarde ou de notification
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Rappel enregistré !')),
-                    );
-                  }
-                },
-                icon: const Icon(Icons.alarm),
-                label: const Text('Enregistrer'),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: _isLoading ? null : _enregistrerRappel,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.indigoAccent,
+                  backgroundColor: Colors.indigo,
                   foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text('ENREGISTRER LE RAPPEL'),
               ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _nomController.dispose();
+    _noteController.dispose();
+    super.dispose();
   }
 }

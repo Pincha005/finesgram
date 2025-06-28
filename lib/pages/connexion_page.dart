@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/models/user_model.dart';
+import 'package:finesgram/models/user_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ConnexionPage extends StatefulWidget {
   const ConnexionPage({Key? key}) : super(key: key);
@@ -25,23 +26,41 @@ class _ConnexionPageState extends State<ConnexionPage> {
   Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
-
-      await Future.delayed(const Duration(seconds: 1));
-
-      if (mounted) {
-        setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Connexion réussie!')),
-        );
-        Navigator.pushReplacementNamed(
-          context,
-          '/accueil',
-          arguments: User(
-            id: 'user_${_emailController.text.hashCode}',
-            nom: 'Utilisateur',
-            email: _emailController.text,
-          ),
-        );
+      try {
+        final query = await FirebaseFirestore.instance
+            .collection('users')
+            .where('email', isEqualTo: _emailController.text.trim())
+            .limit(1)
+            .get();
+        if (query.docs.isEmpty) {
+          throw Exception('Aucun utilisateur trouvé avec cet email.');
+        }
+        final userData = query.docs.first.data();
+        if (userData['password'] != _passwordController.text) {
+          throw Exception('Mot de passe incorrect.');
+        }
+        if (mounted) {
+          setState(() => _isLoading = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Connexion réussie!')),
+          );
+          Navigator.pushReplacementNamed(
+            context,
+            '/accueil',
+            arguments: User(
+              id: query.docs.first.id,
+              nom: userData['nom'] ?? 'Utilisateur',
+              email: userData['email'],
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() => _isLoading = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Erreur: ${e.toString()}')),
+          );
+        }
       }
     }
   }
@@ -130,8 +149,23 @@ class _ConnexionPageState extends State<ConnexionPage> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                      onPressed: () =>
-                          Navigator.pushNamed(context, '/reset-password'),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Mot de passe oublié ?'),
+                            content: const Text(
+                              'Veuillez contacter l’administrateur à finesgram@gmail.com pour réinitialiser votre mot de passe.',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('OK'),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                       child: Text(
                         'Mot de passe oublié ?',
                         style: TextStyle(

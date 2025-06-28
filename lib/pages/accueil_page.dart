@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/models/user_model.dart';
+import 'package:finesgram/models/user_model.dart';
 
 class AccueilPage extends StatelessWidget {
-  final User user;
+  final AppUser user;
 
   const AccueilPage({super.key, required this.user});
 
@@ -10,7 +10,7 @@ class AccueilPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Bonjour, ${user.nom.split(' ').first}'),
+        title: Text('Bonjour, ${user.name.split(' ').first}'),
         backgroundColor: Colors.teal,
         foregroundColor: Colors.white,
       ),
@@ -25,57 +25,50 @@ class AccueilPage extends StatelessWidget {
             icon: Icons.attach_money,
             label: 'Revenu',
             color: Colors.green,
-            onTap: () => Navigator.pushNamed(context, '/revenu'),
+            onTap: () =>
+                Navigator.pushNamed(context, '/revenu', arguments: user),
           ),
           _buildMenuButton(
             context,
             icon: Icons.shopping_cart,
             label: 'Dépense',
             color: Colors.red,
-            onTap: () => Navigator.pushNamed(context, '/depense'),
+            onTap: () =>
+                Navigator.pushNamed(context, '/depense', arguments: user),
           ),
           _buildMenuButton(
             context,
             icon: Icons.savings,
             label: 'Épargne',
             color: Colors.blue,
-            onTap: () => Navigator.pushNamed(context, '/epargne'),
-          ),
-          _buildMenuButton(
-            context,
-            icon: Icons.flag,
-            label: 'Objectifs',
-            color: Colors.purple,
-            onTap: () => Navigator.pushNamed(context, '/objectifs'),
+            onTap: () =>
+                Navigator.pushNamed(context, '/epargne', arguments: user),
           ),
           _buildMenuButton(
             context,
             icon: Icons.history,
             label: 'Historique',
             color: Colors.orange,
-            onTap: () => Navigator.pushNamed(
-              context,
-              '/historique',
-              arguments: user.transactions,
-            ),
+            onTap: () =>
+                Navigator.pushNamed(context, '/historique', arguments: user.uid),
+          ),
+          _buildMenuButton(
+            context,
+            icon: Icons.person,
+            label: 'Profil',
+            color: Colors.purple,
+            onTap: () =>
+                Navigator.pushNamed(context, '/profil', arguments: user),
           ),
           _buildMenuButton(
             context,
             icon: Icons.settings,
             label: 'Paramètres',
             color: Colors.grey,
-            onTap: () => Navigator.pushNamed(
-              context,
-              '/parametres',
-              arguments: user,
-            ),
+            onTap: () =>
+                Navigator.pushNamed(context, '/parametres', arguments: user),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showQuickAddMenu(context),
-        child: const Icon(Icons.add, color: Colors.white),
-        backgroundColor: Colors.teal,
       ),
     );
   }
@@ -118,60 +111,6 @@ class AccueilPage extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  void _showQuickAddMenu(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(
-                'Informations',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-            ),
-            _buildAddOption(
-              context,
-              icon: Icons.info,
-              label: 'A propos de nous',
-              color: Colors.lightGreen,
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/a_propos_de_nous');
-              },
-            ),
-            _buildAddOption(
-              context,
-              icon: Icons.comment,
-              label: 'Commentaire',
-              color: Colors.purpleAccent,
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/commentaire');
-              },
-            ),
-            _buildAddOption(
-              context,
-              icon: Icons.alarm,
-              label: 'Rappel',
-              color: Colors.indigoAccent,
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/rappel');
-              },
-            ),
-            const SizedBox(height: 8),
-          ],
         ),
       ),
     );

@@ -1,8 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/models/user_model.dart';
+import 'package:finesgram/models/user_model.dart';
 
 class EditProfilPage extends StatefulWidget {
-  final User user;
+  final AppUser user;
 
   const EditProfilPage({Key? key, required this.user}) : super(key: key);
 
@@ -20,9 +21,10 @@ class _EditProfilPageState extends State<EditProfilPage> {
   @override
   void initState() {
     super.initState();
-    _nomController = TextEditingController(text: widget.user.nom);
+    _nomController = TextEditingController(text: widget.user.name);
     _emailController = TextEditingController(text: widget.user.email);
-    _telephoneController = TextEditingController(text: widget.user.telephone ?? '');
+    _telephoneController =
+        TextEditingController(text: widget.user.telephone ?? '');
     _adresseController = TextEditingController(text: widget.user.adresse ?? '');
   }
 
@@ -118,7 +120,8 @@ class _EditProfilPageState extends State<EditProfilPage> {
                 color: Theme.of(context).primaryColor,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.camera_alt, color: Colors.white, size: 20),
+              child:
+                  const Icon(Icons.camera_alt, color: Colors.white, size: 20),
             ),
           ),
         ],
@@ -149,21 +152,34 @@ class _EditProfilPageState extends State<EditProfilPage> {
     );
   }
 
-  void _saveProfile() {
+  void _saveProfile() async {
     if (_formKey.currentState?.validate() ?? false) {
-      final updatedUser = User(
-        id: widget.user.id,
-        nom: _nomController.text,
+      final updatedUser = AppUser(
+        uid: widget.user.uid, // Correction ici
+        name: _nomController.text,
         email: _emailController.text,
         photoUrl: widget.user.photoUrl,
         telephone: _telephoneController.text.isEmpty
             ? null
             : _telephoneController.text,
-        adresse: _adresseController.text.isEmpty ? null : _adresseController.text,
-        dateInscription: widget.user.dateInscription,
+        adresse:
+            _adresseController.text.isEmpty ? null : _adresseController.text,
       );
-
-      Navigator.pop(context, updatedUser);
+      // Mise à jour Firestore
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(updatedUser.uid) // Correction ici
+          .update({
+        'name': updatedUser.name, // Correction du champ
+        'telephone': updatedUser.telephone,
+        'adresse': updatedUser.adresse,
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profil mis à jour !')),
+        );
+        Navigator.pop(context, updatedUser);
+      }
     }
   }
 }

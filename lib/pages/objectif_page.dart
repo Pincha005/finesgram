@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:finesgram/models/user_model.dart';
 
 class ObjectifsPage extends StatefulWidget {
   const ObjectifsPage({Key? key}) : super(key: key);
@@ -8,7 +10,6 @@ class ObjectifsPage extends StatefulWidget {
 }
 
 class _ObjectifsPageState extends State<ObjectifsPage> {
-  final List<Objectif> _objectifs = [];
   final _formKey = GlobalKey<FormState>();
   final _nomController = TextEditingController();
   final _montantController = TextEditingController();
@@ -32,49 +33,68 @@ class _ObjectifsPageState extends State<ObjectifsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final user = ModalRoute.of(context)!.settings.arguments as User;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 179, 156, 89),
         title: const Text('Mes Objectifs d\'Épargne'),
       ),
-      body: _buildContent(),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('objectifs')
+            .where('userId', isEqualTo: user.id)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          final objectifs = snapshot.data!.docs.map((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            return Objectif(
+              id: doc.id,
+              nom: data['nom'],
+              montant: (data['montant'] as num).toDouble(),
+              duree: data['duree'],
+              montantActuel: (data['montantActuel'] as num).toDouble(),
+            );
+          }).toList();
+          if (objectifs.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.savings, size: 60, color: Colors.grey[400]),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Aucun objectif défini',
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Appuyez sur le bouton + pour créer un objectif',
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
+                ],
+              ),
+            );
+          }
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: objectifs.length,
+            itemBuilder: (context, index) =>
+                _buildGoalCard(objectifs[index], user),
+          );
+        },
+      ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.blueGrey,
-        onPressed: () => _showAddGoalDialog(context),
+        onPressed: () => _showAddGoalDialog(context, user),
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
 
-  Widget _buildContent() {
-    if (_objectifs.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.savings, size: 60, color: Colors.grey[400]),
-            const SizedBox(height: 16),
-            const Text(
-              'Aucun objectif défini',
-              style: TextStyle(fontSize: 18, color: Colors.grey),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Appuyez sur le bouton + pour créer un objectif',
-              style: TextStyle(color: Colors.grey[600]),
-            ),
-          ],
-        ),
-      );
-    }
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: _objectifs.length,
-      itemBuilder: (context, index) => _buildGoalCard(_objectifs[index]),
-    );
-  }
-
-  Widget _buildGoalCard(Objectif objectif) {
+  Widget _buildGoalCard(Objectif objectif, User user) {
     final progress = objectif.montantActuel / objectif.montant;
     final dailyAmount = objectif.montant / objectif.duree;
     final remainingDays =
@@ -149,7 +169,7 @@ class _ObjectifsPageState extends State<ObjectifsPage> {
     );
   }
 
-  void _showAddGoalDialog(BuildContext context) {
+  void _showAddGoalDialog(BuildContext context, User user) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -194,15 +214,14 @@ class _ObjectifsPageState extends State<ObjectifsPage> {
             child: const Text('Annuler'),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               if (_formKey.currentState?.validate() ?? false) {
-                setState(() {
-                  _objectifs.add(Objectif(
-                    nom: _nomController.text,
-                    montant: double.parse(_montantController.text),
-                    duree: int.parse(_dureeController.text),
-                    montantActuel: 0,
-                  ));
+                await FirebaseFirestore.instance.collection('objectifs').add({
+                  'userId': user.id,
+                  'nom': _nomController.text,
+                  'montant': double.parse(_montantController.text),
+                  'duree': int.parse(_dureeController.text),
+                  'montantActuel': 0.0,
                 });
                 Navigator.pop(context);
               }
@@ -234,14 +253,14 @@ class _ObjectifsPageState extends State<ObjectifsPage> {
             child: const Text('Annuler'),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               if (_montantActuelController.text.isNotEmpty) {
-                setState(() {
-                  final index = _objectifs.indexOf(objectif);
-                  _objectifs[index] = objectif.copyWith(
-                    montantActuel: objectif.montantActuel +
-                        double.parse(_montantActuelController.text),
-                  );
+                final ajout = double.parse(_montantActuelController.text);
+                await FirebaseFirestore.instance
+                    .collection('objectifs')
+                    .doc(objectif.id)
+                    .update({
+                  'montantActuel': objectif.montantActuel + ajout,
                 });
                 Navigator.pop(context);
               }
@@ -265,8 +284,11 @@ class _ObjectifsPageState extends State<ObjectifsPage> {
             child: const Text('Non'),
           ),
           ElevatedButton(
-            onPressed: () {
-              setState(() => _objectifs.remove(objectif));
+            onPressed: () async {
+              await FirebaseFirestore.instance
+                  .collection('objectifs')
+                  .doc(objectif.id)
+                  .delete();
               Navigator.pop(context);
             },
             child: const Text('Oui'),
@@ -278,12 +300,14 @@ class _ObjectifsPageState extends State<ObjectifsPage> {
 }
 
 class Objectif {
+  final String id;
   final String nom;
   final double montant;
   final int duree;
   final double montantActuel;
 
   Objectif({
+    this.id = '',
     required this.nom,
     required this.montant,
     required this.duree,
@@ -291,12 +315,14 @@ class Objectif {
   });
 
   Objectif copyWith({
+    String? id,
     String? nom,
     double? montant,
     int? duree,
     double? montantActuel,
   }) {
     return Objectif(
+      id: id ?? this.id,
       nom: nom ?? this.nom,
       montant: montant ?? this.montant,
       duree: duree ?? this.duree,

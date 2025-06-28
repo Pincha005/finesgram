@@ -1,33 +1,67 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/models/transaction.dart' as trans;
-import 'package:flutter_application_1/models/user_model.dart';
-import 'package:flutter_application_1/pages/commentaire_page.dart';
-import 'package:flutter_application_1/pages/historique_page.dart';
-import 'package:flutter_application_1/pages/rappel_page.dart';
+import 'package:finesgram/models/user_model.dart';
+import 'package:finesgram/pages/commentaire_page.dart';
+import 'package:finesgram/pages/historique_page.dart';
+import 'package:finesgram/pages/rappel_page.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'pages/entree_page.dart';
-import 'pages/inscription_page.dart';
-import 'pages/connexion_page.dart';
-import 'pages/accueil_page.dart';
-import 'pages/revenu_page.dart';
-import 'pages/depense_page.dart';
-import 'pages/epargne_page.dart';
-import 'pages/objectif_page.dart';
-import 'pages/parametres_page.dart';
-import 'pages/profil_page.dart';
-import 'pages/edit_profil_page.dart';
-import 'pages/a_propos_de_nous_page.dart';
+import 'package:finesgram/pages/entree_page.dart';
+import 'package:finesgram/pages/inscription_page.dart';
+import 'package:finesgram/pages/connexion_page.dart';
+import 'package:finesgram/pages/accueil_page.dart';
+import 'package:finesgram/pages/revenu_page.dart';
+import 'package:finesgram/pages/depense_page.dart';
+import 'package:finesgram/pages/epargne_page.dart';
+import 'package:finesgram/pages/objectif_page.dart';
+import 'package:finesgram/pages/parametres_page.dart';
+import 'package:finesgram/pages/profil_page.dart';
+import 'package:finesgram/pages/edit_profil_page.dart';
+import 'package:finesgram/pages/a_propos_de_nous_page.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:finesgram/firebase_options.dart';
 
-void main() => runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    print('Firebase initialisé avec succès!');
+  } catch (e) {
+    print('Erreur d\'initialisation Firebase: $e');
+    runApp(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Text('Erreur de connexion à Firebase: $e'),
+          ),
+        ),
+      ),
+    );
+    return;
+  }
+
+  runApp(MyApp());
+}
+
+class MyApp extends StatefulWidget {
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool _darkMode = false;
+
+  void _toggleTheme(bool value) {
+    setState(() => _darkMode = value);
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Gestion financière',
       theme: ThemeData(
+        brightness: _darkMode ? Brightness.dark : Brightness.light,
         primarySwatch: Colors.teal,
         textTheme: GoogleFonts.poppinsTextTheme(),
         visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -39,51 +73,80 @@ class MyApp extends StatelessWidget {
         '/inscription': (_) => const InscriptionPage(),
         '/connexion': (_) => const ConnexionPage(),
         '/accueil': (context) {
-          final user = ModalRoute.of(context)?.settings.arguments as User;
-          return AccueilPage(user: user);
-        },
-        '/revenu': (_) => const RevenuPage(),
-        '/depense': (_) => const DepensePage(),
-        '/epargne': (_) => const EpargnePage(),
-        '/objectifs': (_) => const ObjectifsPage(),
-        '/historique': (context) {
           final args = ModalRoute.of(context)?.settings.arguments;
-
-          // Gestion unifiée des transactions
-          List<trans.Transaction> transactions = [];
-
-          if (args is User) {
-            transactions =
-                args.transactions?.whereType<trans.Transaction>().toList() ??
-                    [];
-          } else if (args is List) {
-            transactions = args.whereType<trans.Transaction>().toList();
+          if (args is AppUser) {
+            return AccueilPage(user: args);
           }
-
-          return HistoriquePage(transactions: transactions);
+          return _buildErrorPage(context, 'Accueil', args, 'AppUser');
         },
-        '/profil': (context) {
-          final user = ModalRoute.of(context)?.settings.arguments as User?;
-          return user != null ? ProfilPage(user: user) : const ConnexionPage();
+        '/revenu': (context) {
+          final args = ModalRoute.of(context)?.settings.arguments;
+          if (args is AppUser) {
+            return RevenuPage(user: args);
+          }
+          return _buildErrorPage(context, 'Revenu', args, 'AppUser');
         },
+        '/depense': (context) =>
+            _buildPageWithUser(context, (user) => DepensePage(user: user)),
+        '/epargne': (context) =>
+            _buildPageWithUser(context, (user) => EpargnePage(user: user)),
+        '/objectif': (context) => const ObjectifsPage(),
+        '/historique': (context) {
+          final userId = ModalRoute.of(context)?.settings.arguments as String?;
+          return userId != null
+              ? HistoriquePage(userId: userId)
+              : const ConnexionPage();
+        },
+        '/profil': (context) =>
+            _buildPageWithUser(context, (user) => ProfilPage(user: user)),
         '/parametres': (context) {
-          final user = ModalRoute.of(context)?.settings.arguments as User?;
+          final user = ModalRoute.of(context)?.settings.arguments as AppUser?;
           return user != null
-              ? ParametresPage(user: user)
+              ? ParametresPage(
+                  user: user,
+                  darkMode: _darkMode,
+                  onThemeChanged: _toggleTheme,
+                )
               : const ConnexionPage();
         },
-        '/edit-profil': (context) {
-          final user = ModalRoute.of(context)?.settings.arguments as User?;
-          return user != null
-              ? EditProfilPage(user: user)
-              : const ConnexionPage();
-        },
-        '/a_propos_de_nous': (context) => const AProposDeNousPage(),
-        '/commentaire': (context) => const CommentairePage(),
-        '/rappel': (context) => const RappelPage(),
+        '/edit-profil': (context) =>
+            _buildPageWithUser(context, (user) => EditProfilPage(user: user)),
+        '/a_propos_de_nous': (_) => const AProposDeNousPage(),
+        '/commentaire': (_) => const CommentairePage(),
+        '/rappel': (_) => const RappelPage(),
       },
       onUnknownRoute: (settings) => MaterialPageRoute(
         builder: (context) => const EntreePage(),
+      ),
+    );
+  }
+
+  // Méthode helper pour construire les pages nécessitant un utilisateur
+  Widget _buildPageWithUser(
+    BuildContext context,
+    Widget Function(AppUser) builder,
+  ) {
+    final user = ModalRoute.of(context)?.settings.arguments as AppUser?;
+    return user != null ? builder(user) : const ConnexionPage();
+  }
+
+  // Méthode helper pour les pages d'erreur
+  Widget _buildErrorPage(
+    BuildContext context,
+    String pageName,
+    dynamic args,
+    String expectedType,
+  ) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Erreur - $pageName')),
+      body: Center(
+        child: Text(
+          'Erreur : argument de type incorrect pour la page $pageName.\n'
+          'Reçu : ${args?.runtimeType}\n'
+          'Attendu : $expectedType',
+          style: const TextStyle(color: Colors.red, fontSize: 18),
+          textAlign: TextAlign.center,
+        ),
       ),
     );
   }

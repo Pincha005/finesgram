@@ -5,6 +5,9 @@ class TransactionFormPage extends StatefulWidget {
   final String typeLabel;
   final String successMessage;
   final Color appBarColor;
+  final Future<void> Function(
+          double montant, String description, String? categorie, DateTime date)?
+      onSubmit;
 
   const TransactionFormPage({
     Key? key,
@@ -12,6 +15,7 @@ class TransactionFormPage extends StatefulWidget {
     required this.typeLabel,
     required this.successMessage,
     this.appBarColor = const Color.fromARGB(255, 241, 240, 147),
+    this.onSubmit,
   }) : super(key: key);
 
   @override
@@ -51,8 +55,15 @@ class _TransactionFormPageState extends State<TransactionFormPage> {
     super.dispose();
   }
 
-  void _submitForm() {
+  void _submitForm() async {
     if (_formKey.currentState!.validate()) {
+      final montant = double.tryParse(_montantController.text) ?? 0;
+      final description = _typeController.text;
+      final categorie = _selectedCategory;
+      final date = _selectedDate;
+      if (widget.onSubmit != null) {
+        await widget.onSubmit!(montant, description, categorie, date);
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(widget.successMessage)),
       );
@@ -121,7 +132,7 @@ class _TransactionFormPageState extends State<TransactionFormPage> {
                 onChanged: (value) {
                   setState(() {
                     _selectedCategory = value;
-                    _typeController.text = value ?? '';
+                    // Ne pas modifier _typeController.text ici
                   });
                 },
                 decoration: const InputDecoration(

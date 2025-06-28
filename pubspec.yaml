@@ -1,7 +1,7 @@
-name: flutter_application_1
-description: A new Flutter project.
+name: finesgram
+description: Application de gestion financière
 
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: 'none'
 
 version: 1.0.0+1
 
@@ -11,34 +11,41 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  google_fonts: ^6.2.1 # police google fonts
-  cupertino_icons: ^1.0.2 # pour les icônes iOS style Cupertino
-  http: ^1.2.1 # Pour faire les requêtes HTTP
-  url_launcher: ^6.2.6 # Pour permettre l'envoi de mail depuis la page commentaire
- 
 
-  # firebase_core: ^3.14.0
-  #cloud_firestore: ^5.6.9
-   
+  # Packages UI/Design
+  cupertino_icons: ^1.0.2
+  google_fonts: ^6.2.1
+
+  # Packages fonctionnels
+  http: ^1.2.1
+  url_launcher: ^6.2.6
+  image_picker: ^1.1.1
+  flutter_local_notifications: ^19.3.0
+
+  # Suite Firebase (versions cohérentes V2)
+  firebase_core: ^2.32.0
+  firebase_auth: ^4.20.0
+  cloud_firestore: ^4.17.5
+  firebase_storage: ^11.7.7
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_native_splash: ^2.4.0
-  flutter_launcher_icons: ^0.13.1
+  flutter_launcher_icons: ^0.14.4
 
 flutter_native_splash:
   color: "#b7a368"
-  image: assets/logo.jpeg
+  image: assets/logo3.png
   android: true
   ios: true
 
 flutter_icons:
   android: true
   ios: true
-  image_path: "assets/logo.jpeg"
+  image_path: "assets/logo3.png"
 
 flutter:
   uses-material-design: true
   assets:
-    - assets/logo.jpeg
+    - assets/logo3.png

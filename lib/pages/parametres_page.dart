@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/models/user_model.dart';
+import 'package:finesgram/models/user_model.dart';
 
 class ParametresPage extends StatelessWidget {
-  final User user;
+  final AppUser user;
+  final bool darkMode;
+  final ValueChanged<bool> onThemeChanged;
 
   const ParametresPage({
     super.key,
     required this.user,
+    required this.darkMode,
+    required this.onThemeChanged,
   });
 
   @override
@@ -28,7 +32,28 @@ class ParametresPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          _AppearanceCard(),
+          _AppearanceCard(
+            darkMode: darkMode,
+            onThemeChanged: onThemeChanged,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            icon: const Icon(Icons.info_outline),
+            label: const Text('À propos de nous'),
+            onPressed: () => Navigator.pushNamed(context, '/a_propos'),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            icon: const Icon(Icons.comment),
+            label: const Text('Commentaires'),
+            onPressed: () => Navigator.pushNamed(context, '/commentaire'),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            icon: const Icon(Icons.alarm),
+            label: const Text('Rappels'),
+            onPressed: () => Navigator.pushNamed(context, '/rappel'),
+          ),
           const SizedBox(height: 16),
           _LogoutCard(
               onLogout: () =>
@@ -40,7 +65,7 @@ class ParametresPage extends StatelessWidget {
 }
 
 class _UserCard extends StatelessWidget {
-  final User user;
+  final AppUser user;
 
   const _UserCard({required this.user});
 
@@ -48,21 +73,23 @@ class _UserCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
-        leading: CircleAvatar(child: Text(user.nom[0])),
-        title: Text(user.nom),
+        leading: CircleAvatar(child: Text(user.name[0])),
+        title: Text(user.name),
         subtitle: Text(user.email),
       ),
     );
   }
 }
 
-class _AppearanceCard extends StatefulWidget {
-  @override
-  State<_AppearanceCard> createState() => _AppearanceCardState();
-}
+class _AppearanceCard extends StatelessWidget {
+  final bool darkMode;
+  final ValueChanged<bool> onThemeChanged;
 
-class _AppearanceCardState extends State<_AppearanceCard> {
-  bool _darkMode = false;
+  const _AppearanceCard({
+    super.key,
+    required this.darkMode,
+    required this.onThemeChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -76,8 +103,8 @@ class _AppearanceCardState extends State<_AppearanceCard> {
                 style: TextStyle(fontWeight: FontWeight.bold)),
             SwitchListTile(
               title: const Text('Mode sombre'),
-              value: _darkMode,
-              onChanged: (value) => setState(() => _darkMode = value),
+              value: darkMode,
+              onChanged: onThemeChanged,
             ),
           ],
         ),
