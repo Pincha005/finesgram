@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:finesgram/models/user_model.dart';
-import 'package:finesgram/pages/commentaire_page.dart';
-import 'package:finesgram/pages/historique_page.dart';
-import 'package:finesgram/pages/rappel_page.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:finesgram/models/user_model.dart';
 import 'package:finesgram/pages/entree_page.dart';
 import 'package:finesgram/pages/inscription_page.dart';
 import 'package:finesgram/pages/connexion_page.dart';
@@ -16,31 +13,11 @@ import 'package:finesgram/pages/parametres_page.dart';
 import 'package:finesgram/pages/profil_page.dart';
 import 'package:finesgram/pages/edit_profil_page.dart';
 import 'package:finesgram/pages/a_propos_de_nous_page.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:finesgram/firebase_options.dart';
+import 'package:finesgram/pages/commentaire_page.dart';
+import 'package:finesgram/pages/historique_page.dart';
+import 'package:finesgram/pages/rappel_page.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-    print('Firebase initialisé avec succès!');
-  } catch (e) {
-    print('Erreur d\'initialisation Firebase: $e');
-    runApp(
-      MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: Text('Erreur de connexion à Firebase: $e'),
-          ),
-        ),
-      ),
-    );
-    return;
-  }
-
+void main() {
   runApp(MyApp());
 }
 
@@ -80,16 +57,11 @@ class _MyAppState extends State<MyApp> {
           return _buildErrorPage(context, 'Accueil', args, 'AppUser');
         },
         '/revenu': (context) {
-          final args = ModalRoute.of(context)?.settings.arguments;
-          if (args is AppUser) {
-            return RevenuPage(user: args);
-          }
-          return _buildErrorPage(context, 'Revenu', args, 'AppUser');
+          return const RevenuPage();
         },
         '/depense': (context) =>
             _buildPageWithUser(context, (user) => DepensePage(user: user)),
-        '/epargne': (context) =>
-            _buildPageWithUser(context, (user) => EpargnePage(user: user)),
+        '/epargne': (context) => const EpargnePage(),
         '/objectif': (context) => const ObjectifsPage(),
         '/historique': (context) {
           final userId = ModalRoute.of(context)?.settings.arguments as String?;

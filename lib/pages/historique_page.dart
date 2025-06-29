@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:finesgram/models/transaction.dart' as model;
 
 class HistoriquePage extends StatefulWidget {
@@ -30,59 +29,8 @@ class _HistoriquePageState extends State<HistoriquePage> {
           ),
         ],
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('transactions')
-            .where('userId', isEqualTo: widget.userId)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return _buildEmptyState();
-          }
-          List<model.Transaction> transactions = [];
-          for (var doc in snapshot.data!.docs) {
-            try {
-              final t =
-                  model.Transaction.fromMap(doc.data() as Map<String, dynamic>);
-              if (_filterType == null || t.type == _filterType) {
-                transactions.add(t);
-              }
-            } catch (_) {
-              // Ignore transaction if malformed
-              continue;
-            }
-          }
-          transactions.sort((a, b) => _newestFirst
-              ? b.date.compareTo(a.date)
-              : a.date.compareTo(b.date));
-          if (transactions.isEmpty) return _buildEmptyState();
-          return ListView.builder(
-            itemCount: transactions.length,
-            itemBuilder: (context, index) =>
-                _TransactionCard(transaction: transactions[index]),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.history, size: 64, color: Colors.grey),
-          const SizedBox(height: 16),
-          Text(
-            _filterType == null
-                ? 'Aucune transaction'
-                : 'Aucune transaction de ce type',
-            style: const TextStyle(fontSize: 18),
-          ),
-        ],
+      body: Center(
+        child: Text('Historique des transactions de l\'utilisateur ${widget.userId}'),
       ),
     );
   }

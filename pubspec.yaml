@@ -22,12 +22,6 @@ dependencies:
   image_picker: ^1.1.1
   flutter_local_notifications: ^19.3.0
 
-  # Suite Firebase (versions cohérentes V2)
-  firebase_core: ^2.32.0
-  firebase_auth: ^4.20.0
-  cloud_firestore: ^4.17.5
-  firebase_storage: ^11.7.7
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -36,16 +30,16 @@ dev_dependencies:
 
 flutter_native_splash:
   color: "#b7a368"
-  image: assets/logo3.png
+  image: assets/logo-3.png
   android: true
   ios: true
 
 flutter_icons:
   android: true
   ios: true
-  image_path: "assets/logo3.png"
+  image_path: "assets/logo-3.png"
 
 flutter:
   uses-material-design: true
   assets:
-    - assets/logo3.png
+    - assets/logo-3.png

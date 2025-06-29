@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:finesgram/models/user_model.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ConnexionPage extends StatefulWidget {
   const ConnexionPage({Key? key}) : super(key: key);
@@ -26,41 +25,22 @@ class _ConnexionPageState extends State<ConnexionPage> {
   Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
-      try {
-        final query = await FirebaseFirestore.instance
-            .collection('users')
-            .where('email', isEqualTo: _emailController.text.trim())
-            .limit(1)
-            .get();
-        if (query.docs.isEmpty) {
-          throw Exception('Aucun utilisateur trouvé avec cet email.');
-        }
-        final userData = query.docs.first.data();
-        if (userData['password'] != _passwordController.text) {
-          throw Exception('Mot de passe incorrect.');
-        }
-        if (mounted) {
-          setState(() => _isLoading = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Connexion réussie!')),
-          );
-          Navigator.pushReplacementNamed(
-            context,
-            '/accueil',
-            arguments: User(
-              id: query.docs.first.id,
-              nom: userData['nom'] ?? 'Utilisateur',
-              email: userData['email'],
-            ),
-          );
-        }
-      } catch (e) {
-        if (mounted) {
-          setState(() => _isLoading = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Erreur: ${e.toString()}')),
-          );
-        }
+      await Future.delayed(const Duration(seconds: 1)); // Simule un délai réseau
+      // Ici, on accepte toute combinaison email/mot de passe pour la démo
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Connexion réussie!')),
+        );
+        Navigator.pushReplacementNamed(
+          context,
+          '/accueil',
+          arguments: AppUser(
+            uid: 'demo',
+            name: 'Utilisateur',
+            email: _emailController.text.trim(),
+          ),
+        );
       }
     }
   }

@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
@@ -91,15 +90,6 @@ class _RappelPageState extends State<RappelPage> {
         _heure!.hour,
         _heure!.minute,
       );
-
-      // Enregistrement dans Firestore
-      await FirebaseFirestore.instance.collection('rappels').add({
-        'nom': _nomController.text.trim(),
-        'frequence': _frequence,
-        'date': Timestamp.fromDate(dateTime),
-        'note': _noteController.text.trim(),
-        'createdAt': Timestamp.now(),
-      });
 
       // Planification de la notification
       await _scheduleNotification(

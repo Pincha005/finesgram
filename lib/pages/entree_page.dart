@@ -19,7 +19,7 @@ class EntreePage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset('assets/logo3.png', width: 200),
+            Image.asset('assets/logo-3.png', width: 200),
             const Text(
               'Gérer vos finances cher étudiant',
               style: TextStyle(

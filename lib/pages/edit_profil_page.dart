@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:finesgram/models/user_model.dart';
 
@@ -155,7 +154,7 @@ class _EditProfilPageState extends State<EditProfilPage> {
   void _saveProfile() async {
     if (_formKey.currentState?.validate() ?? false) {
       final updatedUser = AppUser(
-        uid: widget.user.uid, // Correction ici
+        uid: widget.user.uid,
         name: _nomController.text,
         email: _emailController.text,
         photoUrl: widget.user.photoUrl,
@@ -165,15 +164,7 @@ class _EditProfilPageState extends State<EditProfilPage> {
         adresse:
             _adresseController.text.isEmpty ? null : _adresseController.text,
       );
-      // Mise à jour Firestore
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(updatedUser.uid) // Correction ici
-          .update({
-        'name': updatedUser.name, // Correction du champ
-        'telephone': updatedUser.telephone,
-        'adresse': updatedUser.adresse,
-      });
+      // Mise à jour locale uniquement (plus de Firestore)
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Profil mis à jour !')),

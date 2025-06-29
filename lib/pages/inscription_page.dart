@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'auth_service.dart';
-import '../models/user_model.dart';
 
 class InscriptionPage extends StatefulWidget {
   const InscriptionPage({Key? key}) : super(key: key);
@@ -38,37 +36,21 @@ class _InscriptionPageState extends State<InscriptionPage> {
       _errorMessage = null;
     });
 
+    await Future.delayed(const Duration(seconds: 1)); // Simule un délai réseau
     try {
-      final authService = AuthService();
-
-      // Vérification de l'email
-      final emailExists = await authService.checkEmailExists(_emailController.text);
-      if (emailExists) {
-        throw 'Cet email est déjà utilisé';
-      }
-
-      // Inscription
-      final user = await authService.registerUser(
-        name: _nameController.text.trim(),
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
+      // Création locale d'un utilisateur sous forme de Map
+      final user = {
+        'uid': DateTime.now().millisecondsSinceEpoch.toString(),
+        'name': _nameController.text.trim(),
+        'email': _emailController.text.trim(),
+        'photoUrl': null,
+      };
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/accueil',
+        (route) => false,
+        arguments: user,
       );
-
-      if (user != null) {
-        // Redirection après inscription réussie
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          '/accueil',
-          (route) => false,
-          arguments: AppUser(
-            uid: user.uid,
-            name: _nameController.text.trim(),
-            email: _emailController.text.trim(),
-            photoUrl: user.photoURL,
-            // Vous pouvez ajouter ici telephone/adresse si vous les collectez dans le formulaire
-          ),
-        );
-      }
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
