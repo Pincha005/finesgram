@@ -29,54 +29,97 @@ class _ObjectifsPageState extends State<ObjectifsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 179, 156, 89),
-        title: const Text('Mes Objectifs d\'Épargne'),
-      ),
-      body: _objectifs.isEmpty
-          ? const Center(child: Text('Aucun objectif ajouté'))
-          : ListView(
-              padding: const EdgeInsets.all(16),
-              children: _objectifs.map((objectif) {
-                final montantJournalier =
-                    objectif['montant'] / objectif['duree'];
-                final progress =
-                    (objectif['montantActuel'] ?? 0) / objectif['montant'];
-
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          objectif['nom'],
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 10),
-                        LinearProgressIndicator(
-                          value: progress,
-                          backgroundColor: Colors.grey[300],
-                          color: Colors.blue,
-                        ),
-                        const SizedBox(height: 10),
-                        Text('Objectif: ${objectif['montant']} FC'),
-                        Text('Durée : ${objectif['duree']}jour'),
-                        Text('À épargner/jour: $montantJournalier FC'),
-                        ElevatedButton(
-                          onPressed: () => _ajouterMontant(context, objectif),
-                          child: const Text('Ajouter un montant'),
-                        ),
-                      ],
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFF5F6FA), Color(0xFFE3E6F3)],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              const SizedBox(height: 18),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircleAvatar(
+                    radius: 32,
+                    backgroundColor: Colors.orange[200],
+                    child: const Icon(Icons.flag, size: 32, color: Colors.white),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    "Mes Objectifs d'Épargne",
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFEF6C00),
                     ),
                   ),
-                );
-              }).toList(),
-            ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              Expanded(
+                child: _objectifs.isEmpty
+                    ? const Center(child: Text('Aucun objectif ajouté'))
+                    : ListView(
+                        padding: const EdgeInsets.all(16),
+                        children: _objectifs.map((objectif) {
+                          final montantJournalier = objectif['montant'] / objectif['duree'];
+                          final progress = (objectif['montantActuel'] ?? 0) / objectif['montant'];
+                          return Card(
+                            elevation: 4,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                            margin: const EdgeInsets.only(bottom: 16),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    objectif['nom'],
+                                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  LinearProgressIndicator(
+                                    value: progress,
+                                    backgroundColor: Colors.grey[300],
+                                    color: Colors.orange,
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Text('Objectif: ${objectif['montant']} FC'),
+                                  Text('Durée : ${objectif['duree']} jours'),
+                                  Text('À épargner/jour: $montantJournalier FC'),
+                                  const SizedBox(height: 8),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: ElevatedButton(
+                                      onPressed: () => _ajouterMontant(context, objectif),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color(0xFFEF6C00),
+                                        foregroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                      ),
+                                      child: const Text('Ajouter un montant'),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+              ),
+            ],
+          ),
+        ),
+      ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color.fromARGB(255, 213, 155, 103),
+        backgroundColor: const Color(0xFFEF6C00),
         onPressed: () => _ajouterObjectif(context),
         child: const Icon(Icons.add),
       ),

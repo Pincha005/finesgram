@@ -36,123 +36,139 @@ class _ConnexionPageState extends State<ConnexionPage> {
   }
 
   @override
-  Widget build(BuildContext) {
+  Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 183, 163, 104),
-      body: SafeArea(
+      backgroundColor: const Color(0xFFF5F6FA),
+      body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: 48.0),
-                const FlutterLogo(size: 100),
-                const SizedBox(height: 24.0),
-                Text(
-                  'connexion',
-                  style: Theme.of(context)
-                      .textTheme
-                      .headlineMedium, // before it was headline4
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 48.0),
-                //champ email
-                TextFormField(
+          child: Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircleAvatar(
+                    radius: 48,
+                    backgroundColor: Colors.indigo[200],
+                    child:
+                        const Icon(Icons.login, size: 48, color: Colors.white),
+                  ),
+                  const SizedBox(height: 18),
+                  const Text(
+                    'Connexion',
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF283593),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Ravi de vous revoir sur Finesgram !",
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.indigo[400],
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  TextFormField(
                     controller: _emailController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Email',
-                      prefixIcon: Icon(Icons.email),
-                      border: OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.email_outlined),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
                     ),
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Email requis';
                       }
-
                       final parts = value.split('@');
                       if (parts.length != 2 || parts[1].split('.').length < 2) {
                         return 'Format: utilisateur@domaine.com';
                       }
-
                       final domainParts = parts[1].split('.');
                       if (domainParts.last.isEmpty ||
                           RegExp(r'[^a-zA-Z]').hasMatch(domainParts.last)) {
                         return 'Extension (.com/.fr) invalide';
                       }
-
                       return null;
-                    }),
-                const SizedBox(height: 16.0),
-
-                // champ mot de passe
-                TextFormField(
-                  controller: _passwordController,
-                  decoration: InputDecoration(
-                    labelText: 'Mot de passe',
-                    prefixIcon: const Icon(Icons.lock),
-                    border: const OutlineInputBorder(),
-                    suffixIcon: IconButton(
-                      icon: Icon(_obscurePassword
-                          ? Icons.visibility
-                          : Icons.visibility_off),
-                      onPressed: () {
-                        setState(() => _obscurePassword = !_obscurePassword);
-                      },
+                    },
+                  ),
+                  const SizedBox(height: 18),
+                  TextFormField(
+                    controller: _passwordController,
+                    decoration: InputDecoration(
+                      labelText: 'Mot de passe',
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                      suffixIcon: IconButton(
+                        icon: Icon(_obscurePassword
+                            ? Icons.visibility
+                            : Icons.visibility_off),
+                        onPressed: () {
+                          setState(() => _obscurePassword = !_obscurePassword);
+                        },
+                      ),
+                    ),
+                    obscureText: _obscurePassword,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Veuillez entrer votre mot de passe';
+                      }
+                      if (value.length < 6) {
+                        return '6 caractères minimum';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF283593),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        textStyle: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      onPressed: _isLoading ? null : _submit,
+                      child: _isLoading
+                          ? const CircularProgressIndicator()
+                          : const Text('Se connecter'),
                     ),
                   ),
-                  obscureText: _obscurePassword,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Veuillez entrer votre mot de passe';
-                    }
-                    if (value.length < 6) {
-                      return '6 caractères minimum';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 8.0),
-
-                // lien mot de passe oublié
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {},
-                    child: const Text('Mot de passe oublié?'),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('Pas encore inscrit?'),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pushReplacementNamed(
+                              context, '/inscription');
+                        },
+                        child: const Text('Créer un compte',
+                            style: TextStyle(color: Color(0xFF283593))),
+                      ),
+                    ],
                   ),
-                ),
-                // Bouton de connexion
-
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  onPressed: _isLoading ? null : _submit,
-                  child: _isLoading
-                      ? const CircularProgressIndicator()
-                      : const Text('Se connecter',
-                          style: TextStyle(fontSize: 16)),
-                ),
-                const SizedBox(height: 16.0),
-
-                // lien vers inscription
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text('Pas encore inscrit?'),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pushReplacementNamed(context, '/inscription');
-                      },
-                      child: const Text('Créer un compte'),
-                    ),
-                  ],
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

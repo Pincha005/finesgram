@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/models/user_model.dart';
+import 'package:finesgram/models/user_model.dart';
 
 class EditProfilPage extends StatefulWidget {
   final User user;
@@ -19,7 +19,8 @@ class _EditProfilPageState extends State<EditProfilPage> {
   void initState() {
     super.initState();
     nomController = TextEditingController(text: widget.user.nom);
-    telephoneController = TextEditingController(text: widget.user.telephone ?? '');
+    telephoneController =
+        TextEditingController(text: widget.user.telephone ?? '');
     adresseController = TextEditingController(text: widget.user.adresse ?? '');
   }
 

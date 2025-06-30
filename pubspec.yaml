@@ -1,4 +1,4 @@
-name: flutter_application_1
+name: finesgram
 description: A new Flutter project.
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -13,14 +13,24 @@ dependencies:
     sdk: flutter
   google_fonts: ^6.2.1 # police google fonts
   cupertino_icons: ^1.0.2 # pour les icônes iOS style Cupertino
-
   http: ^1.2.1 # Pour faire les requêtes HTTP
- # firebase_core: ^3.14.0
-  #cloud_firestore: ^5.6.9
+  url_launcher: ^6.2.5 # Pour ouvrir le client mail
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.13.1
+
+
+flutter_icons:
+  image_path: "assets/logo.jpeg"
+  color: "#F5F6FA"
+  android: true
+  adaptive_icon_foreground: "assets/logo_foreground.jpeg"
+  ios: true
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/logo.jpeg

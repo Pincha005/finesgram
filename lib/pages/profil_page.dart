@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/models/user_model.dart';
-import 'package:flutter_application_1/pages/edit_profil_page.dart';
+import 'package:finesgram/models/user_model.dart';
+import 'package:finesgram/pages/edit_profil_page.dart';
 
 class ProfilPage extends StatefulWidget {
   final User user;
@@ -12,6 +12,16 @@ class ProfilPage extends StatefulWidget {
 }
 
 class _ProfilPageState extends State<ProfilPage> {
+  late User
+      _currentUser; // Ajout d'une variable pour stocker l'utilisateur modifiable
+
+  @override
+  void initState() {
+    super.initState();
+    _currentUser =
+        widget.user; // Initialisation avec l'utilisateur passé en paramètre
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,17 +54,17 @@ class _ProfilPageState extends State<ProfilPage> {
       children: [
         CircleAvatar(
           radius: 50,
-          backgroundImage: widget.user.photoUrl != null
-              ? NetworkImage(widget.user.photoUrl!)
+          backgroundImage: _currentUser.photoUrl != null
+              ? NetworkImage(_currentUser.photoUrl!)
               : const AssetImage('assets/default_avatar.png') as ImageProvider,
         ),
         const SizedBox(height: 10),
         Text(
-          widget.user.nom,
+          _currentUser.nom,
           style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         Text(
-          widget.user.email,
+          _currentUser.email,
           style: TextStyle(color: Colors.grey[600]),
         ),
       ],
@@ -68,13 +78,11 @@ class _ProfilPageState extends State<ProfilPage> {
         child: Column(
           children: [
             _buildDetailItem(Icons.phone, 'Téléphone',
-                widget.user.telephone ?? 'Non renseigné'),
+                _currentUser.telephone ?? 'Non renseigné'),
             const Divider(),
             _buildDetailItem(Icons.location_on, 'Adresse',
-                widget.user.adresse ?? 'Non renseignée'),
+                _currentUser.adresse ?? 'Non renseignée'),
             const Divider(),
-            _buildDetailItem(Icons.date_range, 'Membre depuis',
-                widget.user.dateInscription ?? 'Date inconnue'),
           ],
         ),
       ),
@@ -109,14 +117,13 @@ class _ProfilPageState extends State<ProfilPage> {
     final updatedUser = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => EditProfilPage(user: widget.user),
+        builder: (context) => EditProfilPage(user: _currentUser),
       ),
     );
+
     if (updatedUser != null && updatedUser is User) {
       setState(() {
-        widget.user.nom = updatedUser.nom;
-        widget.user.telephone = updatedUser.telephone;
-        widget.user.adresse = updatedUser.adresse;
+        _currentUser = updatedUser; // Mise à jour de l'utilisateur
       });
     }
   }
@@ -135,7 +142,6 @@ class _ProfilPageState extends State<ProfilPage> {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              // Ajoutez ici votre logique de déconnexion
               Navigator.pushReplacementNamed(context, '/connexion');
             },
             child: const Text(
